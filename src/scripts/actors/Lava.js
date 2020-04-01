@@ -1,18 +1,28 @@
 import Vector from "../helpers/Vector";
+import Shapes from "../helpers/Shapes";
+import Colors from "../helpers/Colors";
+import Types from "../helpers/Types";
+import Actor from "./Actor";
 
-class Lava {
+class Lava extends Actor {
     constructor(pos, type) {
+        super();
         this.pos = pos;
         this.size = new Vector(1, 1);
         if (type === 'v') {
             this.speed = new Vector(1.3, 0);
         } else {
-            this.speed = new Vector(-1.3, 0);
+            this.speed = new Vector(1.3, 0);
         }
-        this.color = 'black';
-        this.touched = false;
-        this.touchedColor = 'red';
-        this.type = 'lava';
+
+        this.damage = 1;
+        this.type = Types.enemy;
+        this.shape = Shapes.square;
+        this.color = Colors.black;
+
+        this.setSprite('enemy.png', 32);
+        this.setAnimation('stand', [0, 1], 120);
+        this.playAnimation('stand');
     }
 
     act(level, keys) {
@@ -26,7 +36,7 @@ class Lava {
         if (!obstacle.type) {
             this.pos = newPos;
         } else {
-            this.speed = this.speed.times(-1)
+            this.changeDirection();
         }
     }
 
@@ -35,15 +45,33 @@ class Lava {
         const newPos = this.pos.plus(new Vector(this.size.x * dir, this.size.y));
         const obstacle = level.obstacleAt(newPos, this.size);
         if (!obstacle.type) {
-            this.speed = this.speed.times(-1);
+            this.changeDirection();
         }
     }
 
-    draw(ctx, level) {
-        ctx.beginPath();
-        ctx.fillStyle = this.color;
-        ctx.rect(this.pos.x * level.size, this.pos.y * level.size, this.size.x * level.size, this.size.y * level.size);
-        ctx.fill();
+    changeDirection() {
+        this.speed = this.speed.times(-1);
+        this.rotation = Math.sign(this.speed.x);
+    }
+
+    // draw(ctx, level) {
+    //     if (this.speed.x > 0) {
+    //         ctx.drawImage(this.image, this.pos.x * level.size, this.pos.y * level.size);
+    //     } else {
+    //         ctx.save();
+    //         ctx.scale(-1, 1);
+    //         ctx.drawImage(this.image, -this.pos.x * level.size - (this.size.x * level.size), this.pos.y * level.size);
+    //         ctx.restore();
+    //     }
+    // }
+
+    debugDraw(ctx, level) {
+        // ctx.beginPath();
+        // ctx.globalAlpha = 0.3;
+        // ctx.fillStyle = Colors.debug;
+        // ctx.rect(this.pos.x * level.size, this.pos.y * level.size, this.size.x * level.size, this.size.y * level.size);
+        // ctx.fill();
+        // ctx.globalAlpha = 1;
     }
 }
 

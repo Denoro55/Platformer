@@ -5,8 +5,8 @@ import Menu from "./states/Menu"
 import Game from "./states/Game"
 
 // maps
-import level1 from './maps/level1';
-console.log(level1);
+import level1 from './maps/level2';
+// console.log(level1);
 
 const maps = [level1];
 
@@ -14,8 +14,8 @@ const canvas = document.querySelector('canvas');
 
 const config = {
     development: false,
-    debug: true,
-    scriptTime: true
+    debug: false,
+    scriptTime: false
 };
 
 const engine = new Engine(canvas, maps, config);

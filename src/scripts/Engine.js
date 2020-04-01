@@ -71,7 +71,7 @@ export default class Engine {
                 parsedMap.actors.push(actor)
             });
 
-            console.log(parsedMap);
+            // console.log(parsedMap);
             parsedMaps.push(parsedMap);
         });
 
