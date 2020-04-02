@@ -1,5 +1,5 @@
 import Vector from "../helpers/Vector";
-import Colors from "../helpers/Colors";
+import Colors from "../helpers/types/Colors";
 
 export default class {
     constructor({pos, speed, size, color, name, strokeWidth, style, alpha}) {

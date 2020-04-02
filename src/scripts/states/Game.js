@@ -2,13 +2,13 @@ import Level from "../core/Level"
 import Display from "../core/Display"
 
 export default class Game {
-    constructor() {
+    constructor(engine) {
         const arrowCodes = {37: "left", 38: "up", 39: "right", 90: 'z'};
         this.keys = this.trackKeys(arrowCodes);
     }
 
-    create(game) {
-        this.level = new Level(game, game.maps[game.currentLevel]);
+    create(engine) {
+        this.level = new Level(engine, engine.maps[engine.currentLevel]);
         this.display = new Display(this.level);
     }
 
@@ -25,10 +25,10 @@ export default class Game {
         return pressed;
     }
 
-    update(game) {
+    update(engine) {
         this.level.animate(this.keys);
         if (this.level.status === 'lost') {
-            this.create(game);
+            this.create(engine);
             return false;
         }
     }

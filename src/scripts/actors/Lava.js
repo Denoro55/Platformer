@@ -1,7 +1,7 @@
 import Vector from "../helpers/Vector";
-import Shapes from "../helpers/Shapes";
-import Colors from "../helpers/Colors";
-import Types from "../helpers/Types";
+import Shapes from "../helpers/types/Shapes";
+import Colors from "../helpers/types/Colors";
+import Types from "../helpers/types/Types";
 import Actor from "./Actor";
 
 class Lava extends Actor {
@@ -56,11 +56,11 @@ class Lava extends Actor {
 
     // draw(ctx, level) {
     //     if (this.speed.x > 0) {
-    //         ctx.drawImage(this.image, this.pos.x * level.size, this.pos.y * level.size);
+    //         ctx.drawImage(this.image, this.pos.x * level.cellSize, this.pos.y * level.cellSize);
     //     } else {
     //         ctx.save();
     //         ctx.scale(-1, 1);
-    //         ctx.drawImage(this.image, -this.pos.x * level.size - (this.size.x * level.size), this.pos.y * level.size);
+    //         ctx.drawImage(this.image, -this.pos.x * level.cellSize - (this.size.x * level.cellSize), this.pos.y * level.cellSize);
     //         ctx.restore();
     //     }
     // }
@@ -69,7 +69,7 @@ class Lava extends Actor {
         // ctx.beginPath();
         // ctx.globalAlpha = 0.3;
         // ctx.fillStyle = Colors.debug;
-        // ctx.rect(this.pos.x * level.size, this.pos.y * level.size, this.size.x * level.size, this.size.y * level.size);
+        // ctx.rect(this.pos.x * level.cellSize, this.pos.y * level.cellSize, this.size.x * level.cellSize, this.size.y * level.cellSize);
         // ctx.fill();
         // ctx.globalAlpha = 1;
     }

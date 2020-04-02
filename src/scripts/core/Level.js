@@ -5,8 +5,8 @@ import Sphere from "../actors/Sphere";
 import Saw from "../actors/Saw";
 import Vector from "../helpers/Vector";
 import Star from "../effects/Star";
-import {getRandomPoint} from "../helpers/functions";
-import Colors from "../helpers/Colors";
+import {getRandomPoint, clamp} from "../helpers/functions";
+import Colors from "../helpers/types/Colors";
 import Bubble from "../effects/Bubble";
 
 const objectsFromMap = {
@@ -23,51 +23,47 @@ const actors = {
     6: Saw,
 };
 
-// circle
-function clamp (x, min, max) {
-    if (x < min) return min;
-    if (x > max) return max;
-    return x;
-}
-
 class Level {
     constructor(game, currentMap) {
-        const map = currentMap.tiles;
+        const mapTiles = currentMap.tiles;
+        this.debug = game.config.debug;
 
-        this.debug = false;
         this.ctx = game.ctx;
-        this.width = map[0].length;
-        this.height = map.length;
+        this.canvasWidth = game.gameWidth;
+        this.canvasHeight = game.gameHeight;
+        this.cellsX = mapTiles[0].length;
+        this.cellsY = mapTiles.length;
+        this.firstLayer = [];
         this.grid = [];
         this.actors = [];
         this.effects = [];
-        this.fail = false;
 
         this.playerHp = 0;
         this.cameraX = 0;
 
         // params
-        this.checkSize = 15;
-        this.size = 32;
+        this.cellSize = 32;
         this.step = 0.016;
 
-        for (let i = 0; i < this.height; i++) {
+        // size of check (game status)
+        this.checkSize = 15;
+
+        for (let i = 0; i < this.cellsY; i++) {
             let gridLine = [];
-            for (let n = 0; n < this.width; n++) {
-                const currentCell = map[i][n];
+            for (let n = 0; n < this.cellsX; n++) {
+                const currentCell = mapTiles[i][n];
                 let objectType = objectsFromMap[currentCell] || null;
 
-                // create bubbles
+                // create bubbles and add lava to first layer
                 if (objectType === 'lava') {
+                    this.firstLayer.push({
+                        name: 'lava',
+                        x: n,
+                        y: i
+                    });
                     this.effects.push(new Bubble({
-                        pos: new Vector(n, i),
-                        size: new Vector(1, 1),
-                        color: Colors.white,
-                        strokeWidth: 1,
-                        rotation: 0,
-                        delay: Math.random() * 60,
-                        style: 'fill'
-                    }))
+                        pos: new Vector(n, i)
+                    }));
                 }
                 gridLine.push(objectType)
             }
@@ -77,8 +73,8 @@ class Level {
         currentMap.actors.forEach(actor => {
             const Actor = actors[actor.gid];
 
-            const x = (actor.x / this.size);
-            const y = (actor.y / this.size) - 1;
+            const x = (actor.x / this.cellSize);
+            const y = (actor.y / this.cellSize) - 1;
 
             this.actors.push(new Actor(new Vector(x, y), 0));
         });
@@ -86,7 +82,7 @@ class Level {
         // stars
         for (let i = 0; i < 20; i++) {
             this.effects.push(new Star({
-                pos: getRandomPoint(this.width, this.height),
+                pos: getRandomPoint(this.cellsX, this.cellsY),
                 size: new Vector(0, 0),
                 color: Colors.white,
                 strokeWidth: 1,
@@ -127,13 +123,13 @@ class Level {
         if (startX < 0) {
             collider.pos = {
                 x: -1,
-                y: this.height
+                y: this.cellsY
             };
             return collider;
-        } else if (endX > this.width) {
+        } else if (endX > this.cellsX) {
             collider.pos = {
-                x: this.width,
-                y: this.height
+                x: this.cellsX,
+                y: this.cellsY
             };
             return collider;
         }
@@ -156,7 +152,7 @@ class Level {
     }
 
     actorAt(actor) {
-        const cellSize = this.size;
+        const cellSize = this.cellSize;
 
         for (let i = 0; i < this.actors.length; i++) {
             const other = this.actors[i];
@@ -190,35 +186,29 @@ class Level {
     }
 
     updateCamera(x) {
-        if (x > this.width / 2) {
-            this.cameraX = Math.floor((this.width / 2 - x) * this.size);
-        } else {
+        const xx = x * this.cellSize;
+        const center = this.canvasWidth / 2;
+        const endX = this.cellsX * this.cellSize - center;
+
+        if (xx > center && xx < endX) {
+            this.cameraX = Math.floor((center - xx));
+        } else if (xx < endX) {
             this.cameraX = 0;
         }
     }
 
-    // playerTouched(other, player) {
-    //     console.log('touched ', other);
-    //     switch (other.type) {
-    //         case 'coin':
-    //             this.actors = this.actors.filter(actor => actor !== other);
-    //             if (!this.actors.some(actor => {
-    //                 return actor.type === 'coin';
-    //             })) {
-    //                 this.status = 'win';
-    //             }
-    //             break;
-    //         case 'sphere':
-    //             other.activate(player);
-    //             break;
-    //         case 'lava':
-    //             this.status = 'lost';
-    //             break;
-    //         case 'enemy':
-    //             this.status = 'lost';
-    //             break;
-    //     }
-    // }
+    getViewParams() {
+        if (this.cameraX < this.cellSize) {
+            const cellsLeft = -Math.floor(this.cameraX / this.cellSize) - 1;
+            return {
+                x: [cellsLeft, this.canvasWidth / this.cellSize + cellsLeft + 1]
+            }
+        } else {
+            return {
+                x: [0, Math.floor(this.canvasWidth / this.cellSize)]
+            }
+        }
+    }
 }
 
 export default Level;

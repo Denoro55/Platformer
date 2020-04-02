@@ -1,5 +1,5 @@
 import Vector from "../helpers/Vector";
-import Shapes from "../helpers/Shapes";
+import Shapes from "../helpers/types/Shapes";
 import {getRandomPoint} from '../helpers/functions';
 import Effect from "./Effect";
 
@@ -25,8 +25,9 @@ export default class extends Effect {
             const newSign = Math.sign(sin);
             this.size = new Vector(this.alpha * .16, this.alpha * .16);
             this.pos = new Vector(this.startPos.x - this.alpha * .08, this.startPos.y - this.alpha * .08);
+            const viewParams = level.getViewParams();
             if (Math.sign(sin) !== this.sign) {
-                this.startPos = getRandomPoint(level.width, level.height);
+                this.startPos = getRandomPoint(viewParams.x[0] + level.canvasWidth / level.cellSize, level.canvasHeight / level.cellSize - 4);
             }
             this.sign = newSign;
         }

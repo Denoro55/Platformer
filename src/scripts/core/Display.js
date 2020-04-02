@@ -15,24 +15,46 @@ class DOMDisplay {
     }
 
     drawBackground(ctx) {
-        const size = this.level.size;
+        const size = this.level.cellSize;
         const yLen = this.level.grid.length;
         const xLen = this.level.grid[0].length;
 
+        let count = 0;
+
+        const viewParams = this.level.getViewParams();
+
+        this.level.firstLayer.forEach(tile => {
+            switch (tile.name) {
+                case 'lava':
+                    ctx.beginPath();
+                    ctx.fillStyle = objectsColor[tile.name];
+                    ctx.rect(tile.x * size, tile.y * size, size, size);
+                    ctx.fill();
+                    break;
+            }
+        });
+
         for (let i = 0; i < yLen; i++) {
-            for (let n = 0; n < xLen; n++) {
+            // for (let n = 0; n < xLen; n++) {
+            for (let n = viewParams.x[0]; n < viewParams.x[1]; n++) {
                 const cellType = this.level.grid[i][n];
                 ctx.beginPath();
                 ctx.fillStyle = objectsColor[cellType];
-                // ctx.rect(n * size, i * size, size, size);
-                if (cellType === 'lava') {
-                    ctx.rect(n * size, i * size, size, size);
-                } else if (cellType === 'wall') {
+                if (cellType === 'wall') {
                     ctx.drawImage(this.tile, n * size - 2, i * size - 2);
                 }
+                // count ++;
+                // ctx.rect(n * size, i * size, size, size);
+                // if (cellType === 'lava') {
+                //     ctx.rect(n * size, i * size, size, size);
+                // } else if (cellType === 'wall') {
+                //     ctx.drawImage(this.tile, n * size - 2, i * size - 2);
+                // }
                 ctx.fill();
             }
         }
+
+        // console.log(count);
     }
 
     drawActors(ctx) {
@@ -48,7 +70,7 @@ class DOMDisplay {
     drawCheck(ctx) {
         const checkSize = this.level.checkSize;
 
-        if (!this.level.status) {
+        if (this.level.status !== 'win') {
             ctx.beginPath();
             ctx.lineWidth = "2";
             ctx.strokeStyle = 'red';
@@ -100,17 +122,17 @@ class DOMDisplay {
             switch (effect.type) {
                 case 'star':
                     if (effect.options.style === 'stroke') {
-                        ctx.rect(effect.pos.x * this.level.size, effect.pos.y * this.level.size, effect.size.x * this.level.size, effect.size.y * this.level.size);
+                        ctx.rect(effect.pos.x * this.level.cellSize, effect.pos.y * this.level.cellSize, effect.size.x * this.level.cellSize, effect.size.y * this.level.cellSize);
                         ctx.stroke();
                     } else {
                         ctx.save();
                         ctx.globalAlpha = effect.alpha;
-                        const offsetX = effect.pos.x * this.level.size + ((effect.size.x * this.level.size) / 2);
-                        const offsetY = effect.pos.y* this.level.size + ((effect.size.y * this.level.size) / 2);
+                        const offsetX = effect.pos.x * this.level.cellSize + ((effect.size.x * this.level.cellSize) / 2);
+                        const offsetY = effect.pos.y* this.level.cellSize + ((effect.size.y * this.level.cellSize) / 2);
                         ctx.translate(offsetX, offsetY);
                         ctx.rotate(effect.rotation * Math.PI / 180); // rotate around the start point of your line
                         ctx.translate(-offsetX, -offsetY);
-                        ctx.fillRect(effect.pos.x * this.level.size, effect.pos.y * this.level.size, effect.size.x * this.level.size, effect.size.y * this.level.size);
+                        ctx.fillRect(effect.pos.x * this.level.cellSize, effect.pos.y * this.level.cellSize, effect.size.x * this.level.cellSize, effect.size.y * this.level.cellSize);
                         ctx.restore();
                     }
                     break;
@@ -118,7 +140,7 @@ class DOMDisplay {
                     ctx.globalAlpha = effect.alpha;
                     ctx.beginPath();
                     ctx.fillStyle = effect.color;
-                    ctx.arc((effect.pos.x + .5 + effect.offsetX) * this.level.size, (effect.pos.y) * this.level.size, effect.timer / 30, 0, 2 * Math.PI);
+                    ctx.arc((effect.pos.x + .5 + effect.offsetX) * this.level.cellSize, (effect.pos.y) * this.level.cellSize, effect.timer / 30, 0, 2 * Math.PI);
                     ctx.fill();
                     break;
             }
@@ -130,7 +152,7 @@ class DOMDisplay {
         ctx.font = "14px Arial";
         ctx.fillStyle = "white";
         ctx.textAlign = "center";
-        ctx.fillText("Тестовая площадка", 450 - this.level.cameraX, 55);
+        ctx.fillText("Уровень 1", 450 - this.level.cameraX, 40);
 
         ctx.textAlign = "left";
         ctx.font = "12px Arial";
@@ -145,6 +167,7 @@ class DOMDisplay {
         const ctx = this.level.ctx;
         ctx.save();
         ctx.translate(this.level.cameraX, 0);
+
         ctx.drawImage(this.bg, -this.level.cameraX, 0);
         this.drawEffects(ctx);
         this.drawActors(ctx);

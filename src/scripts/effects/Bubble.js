@@ -1,6 +1,4 @@
-import Shapes from "../helpers/Shapes";
-import Effect from "./Effect";
-import Colors from "../helpers/Colors";
+import Colors from "../helpers/types/Colors";
 
 export default class  {
     constructor(params) {

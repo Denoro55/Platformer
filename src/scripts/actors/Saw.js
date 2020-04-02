@@ -1,7 +1,7 @@
 import Vector from "../helpers/Vector";
-import Shapes from "../helpers/Shapes";
-import Colors from "../helpers/Colors";
-import Types from "../helpers/Types";
+import Shapes from "../helpers/types/Shapes";
+import Colors from "../helpers/types/Colors";
+import Types from "../helpers/types/Types";
 
 class Saw {
     constructor(pos) {
@@ -36,18 +36,17 @@ class Saw {
             y: this.size.y - decreaseSize,
         };
 
-        const xx = pos.x * level.size + ((size.x * level.size) / 2);
-        const yy = pos.y * level.size + ((size.y * level.size) / 2);
+        const xx = pos.x * level.cellSize + ((size.x * level.cellSize) / 2);
+        const yy = pos.y * level.cellSize + ((size.y * level.cellSize) / 2);
 
         [(this.rotation) * Math.PI / 180, (this.rotation + 45) * Math.PI / 180].forEach(rot => {
             ctx.save();
             ctx.translate(xx, yy);
             ctx.rotate(rot);
             ctx.translate(-xx, -yy);
-            ctx.rect(pos.x * level.size, pos.y * level.size, size.x * level.size, size.y * level.size);
+            ctx.rect(pos.x * level.cellSize, pos.y * level.cellSize, size.x * level.cellSize, size.y * level.cellSize);
             ctx.fill();
             ctx.restore();
-            // ctx.setTransform(1, 0, 0, 1, 0, 0);
         });
     }
 
@@ -55,8 +54,8 @@ class Saw {
         ctx.beginPath();
         ctx.globalAlpha = 0.3;
         ctx.fillStyle = Colors.debug;
-        ctx.arc((this.pos.x + .5) * level.size, (this.pos.y + .5) * level.size,  (this.size.x * level.size) / 2, 0, 2 * Math.PI);
-        // ctx.rect((this.pos.x - .5) * level.size, (this.pos.y - .5) * level.size, this.size.x * level.size, this.size.y * level.size);
+        ctx.arc((this.pos.x + .5) * level.cellSize, (this.pos.y + .5) * level.cellSize,  (this.size.x * level.cellSize) / 2, 0, 2 * Math.PI);
+        // ctx.rect((this.pos.x - .5) * level.cellSize, (this.pos.y - .5) * level.cellSize, this.size.x * level.cellSize, this.size.y * level.cellSize);
         ctx.fill();
         ctx.globalAlpha = 1;
     }

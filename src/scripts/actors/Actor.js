@@ -40,11 +40,11 @@ class Actor {
 
     draw(ctx, level) {
         if (this.rotation > 0) {
-            ctx.drawImage(this.image, this.currentFrame * this.spriteSize, 0, this.spriteSize - 1, this.spriteSize, this.pos.x * level.size, this.pos.y * level.size, this.spriteSize, this.spriteSize);
+            ctx.drawImage(this.image, this.currentFrame * this.spriteSize, 0, this.spriteSize - 1, this.spriteSize, this.pos.x * level.cellSize, this.pos.y * level.cellSize, this.spriteSize, this.spriteSize);
         } else {
             ctx.save();
             ctx.scale(-1, 1);
-            ctx.drawImage(this.image, this.currentFrame * this.spriteSize, 0, this.spriteSize - 1, this.spriteSize, -this.pos.x * level.size - (this.size.x * level.size), this.pos.y * level.size, this.spriteSize, this.spriteSize);
+            ctx.drawImage(this.image, this.currentFrame * this.spriteSize, 0, this.spriteSize - 1, this.spriteSize, -this.pos.x * level.cellSize - (this.size.x * level.cellSize), this.pos.y * level.cellSize, this.spriteSize, this.spriteSize);
             ctx.restore();
         }
     }

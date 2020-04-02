@@ -1,7 +1,7 @@
 import Vector from "../helpers/Vector";
-import Shapes from "../helpers/Shapes";
-import Colors from "../helpers/Colors";
-import Types from "../helpers/Types";
+import Shapes from "../helpers/types/Shapes";
+import Colors from "../helpers/types/Colors";
+import Types from "../helpers/types/Types";
 
 class Coin {
     constructor(pos) {
@@ -23,7 +23,7 @@ class Coin {
     draw(ctx, level) {
         ctx.beginPath();
         ctx.fillStyle = this.color;
-        ctx.rect(this.pos.x * level.size, this.pos.y * level.size, this.size.x * level.size, this.size.y * level.size);
+        ctx.rect(this.pos.x * level.cellSize, this.pos.y * level.cellSize, this.size.x * level.cellSize, this.size.y * level.cellSize);
         ctx.fill();
     }
 

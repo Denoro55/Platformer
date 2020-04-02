@@ -1,11 +1,11 @@
 import Vector from "../helpers/Vector";
-import Shapes from "../helpers/Shapes";
-import Colors from "../helpers/Colors";
-import Types from "../helpers/Types";
+import Shapes from "../helpers/types/Shapes";
+import Colors from "../helpers/types/Colors";
+import Types from "../helpers/types/Types";
 
 class Sphere {
     constructor(pos) {
-        this.pos = this.basePos = pos.plus(new Vector(0, 0.55));
+        this.pos = this.basePos = pos.plus(new Vector(0, 0.35));
         this.size = new Vector(0.25, 0.25);
         this.wobble = Math.random() * Math.PI * 2;
         this.reloadTime = 150;
@@ -36,7 +36,7 @@ class Sphere {
         ctx.globalAlpha = this.timer === -1 ? 1 : 0;
         ctx.beginPath();
         ctx.fillStyle = this.color;
-        ctx.arc((this.pos.x + .5) * level.size, (this.pos.y + .5) * level.size, 4, 0, 2 * Math.PI);
+        ctx.arc((this.pos.x + .5) * level.cellSize, (this.pos.y + .5) * level.cellSize, 4, 0, 2 * Math.PI);
         ctx.fill();
         ctx.globalAlpha = 1;
     }

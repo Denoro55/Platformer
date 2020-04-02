@@ -1,6 +1,6 @@
 import Vector from "../helpers/Vector";
 import Actor from "./Actor";
-import Colors from "../helpers/Colors";
+import Colors from "../helpers/types/Colors";
 
 class Player extends Actor {
     constructor(pos) {
@@ -10,7 +10,6 @@ class Player extends Actor {
         this.speed = new Vector(0, 0);
         this.color = Colors.black;
         this.touched = false;
-        this.touchedColor = Colors.red;
         this.hp = 100;
         this.initialSpeed = 6;
         this.speedX = this.initialSpeed;
@@ -65,6 +64,7 @@ class Player extends Actor {
 
     moveX(level, keys) {
         this.speed.x = 0;
+
         if (keys.left) {
             this.speed.x -= this.speedX;
             this.rotation = -1;
@@ -73,7 +73,13 @@ class Player extends Actor {
             this.speed.x += this.speedX;
             this.rotation = 1;
         }
+
         level.updateCamera(this.pos.x);
+
+        if (this.pos.x > level.cellsX - 1 && level.status === 'coins') {
+            level.status = 'win';
+        }
+
         const motion = new Vector(this.speed.x * level.step, 0);
         const newPos = this.pos.plus(motion);
         const obstacle = level.obstacleAt(newPos, this.size);
@@ -97,7 +103,7 @@ class Player extends Actor {
         const motion = new Vector(0, this.speed.y * level.step);
         const newPos = this.pos.plus(motion);
 
-        if (newPos.y + this.size.y > level.height) {
+        if (newPos.y + this.size.y > level.cellsY - .5) {
             level.status = 'lost';
         }
 
@@ -153,7 +159,7 @@ class Player extends Actor {
                     if (!level.actors.some(actor => {
                         return actor.type === 'coin';
                     })) {
-                        level.status = 'win';
+                        level.status = 'coins';
                     }
                     break;
                 case 'sphere':

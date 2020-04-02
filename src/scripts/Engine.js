@@ -9,6 +9,9 @@ export default class Engine {
         this.maps = this.parseMaps(maps);
         this.currentLevel = 0;
         this.config = config;
+
+        const fakeImage = new Image();
+        fakeImage.src = '/img/bg/4.jpg';
     }
 
     addState(name, handler, params = {}) {
