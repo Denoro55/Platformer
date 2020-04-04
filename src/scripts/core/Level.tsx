@@ -1,8 +1,4 @@
 import Player from '../actors/Player';
-import Coin from "../actors/Coin";
-import Lava from "../actors/Lava";
-import Sphere from "../actors/Sphere";
-import Saw from "../actors/Saw";
 import Vector from "../helpers/Vector";
 import Star from "../effects/Star";
 import {getRandomPoint, clamp} from "../helpers/functions";
@@ -12,19 +8,8 @@ import Engine from "../Engine";
 import {Codes} from "../interfaces/index";
 import {Statuses} from "../enums/index";
 
-const objectsFromMap: any = {
-    0: null,
-    1: 'wall',
-    2: 'lava'
-};
-
-const actors: any = {
-    2: Lava,
-    3: Player,
-    4: Sphere,
-    5: Coin,
-    6: Saw,
-};
+import tilesFromMap from "../map/tilesFromMap";
+import actorsFromMap from "../map/actorsFromMap";
 
 class Level {
     debug: object;
@@ -52,6 +37,8 @@ class Level {
 
     win: boolean;
 
+    player: any;
+
     constructor(engine: Engine, currentMap: any) {
         const mapTiles = currentMap.tiles;
         this.debug = engine.config.debug;
@@ -68,6 +55,7 @@ class Level {
         this.grid = [];
         this.actors = [];
         this.effects = [];
+        this.player = null;
 
         this.win = false;
         this.timeNextLevel = -1;
@@ -87,7 +75,7 @@ class Level {
             let gridLine: any[] = [];
             for (let n = 0; n < this.cellsX; n++) {
                 const currentCell = mapTiles[i][n];
-                let objectType = objectsFromMap[currentCell] || null;
+                let objectType = tilesFromMap[currentCell].name;
 
                 // create bubbles and add lava to first layer
                 if (objectType === 'lava') {
@@ -96,23 +84,31 @@ class Level {
                         x: n,
                         y: i
                     });
-                    this.effects.push(new Bubble({
-                        pos: new Vector(n, i)
-                    }));
+                    const upperCell: string = mapTiles[i - 1][n];
+                    const isLava: boolean = tilesFromMap[upperCell].name === 'lava';
+                    if (!isLava) {
+                        this.effects.push(new Bubble({
+                            pos: new Vector(n, i)
+                        }));
+                    }
                 }
                 gridLine.push(objectType);
             }
             this.grid.push(gridLine);
         }
 
+        console.log(this.grid);
+
         currentMap.actors.forEach((actor: any) => {
-            const Actor = actors[actor.gid];
+            const Actor = actorsFromMap[actor.gid];
 
             const x = (actor.x / this.cellSize);
             const y = (actor.y / this.cellSize) - 1;
 
-            this.actors.push(new Actor(new Vector(x, y), 0));
+            this.actors.push(new Actor(new Vector(x, y), actor.properties));
         });
+
+        this.player = this.actors.find(actor => actor instanceof Player);
 
         const viewParams = this.currentCamera;
 
@@ -193,20 +189,22 @@ class Level {
         return result;
     }
 
-    actorAt(actor: Player) {
+    actorAt(pos: Vector, size: Vector) {
         const cellSize = this.cellSize;
 
         for (let i = 0; i < this.actors.length; i++) {
             const other = this.actors[i];
 
+            if (!other.collides) continue;
+
             switch (other.shape) {
                 case 'square':
                     // square to square
-                    if (other !== actor &&
-                        actor.pos.x + actor.size.x > other.pos.x &&
-                        actor.pos.x < other.size.x + other.pos.x &&
-                        actor.pos.y + actor.size.y > other.pos.y &&
-                        actor.pos.y < other.size.y + other.pos.y) {
+                    if (other !== this.player &&
+                        pos.x + size.x > other.pos.x &&
+                        pos.x < other.size.x + other.pos.x &&
+                        pos.y + size.y > other.pos.y &&
+                        pos.y < other.size.y + other.pos.y) {
                         return other;
                     }
                     break;
@@ -215,8 +213,8 @@ class Level {
                     const centerX = (other.pos.x + 0.5) * cellSize;
                     const centerY = (other.pos.y + 0.5) * cellSize;
 
-                    const clampedX = clamp(centerX, actor.pos.x * cellSize, actor.pos.x * cellSize + actor.size.x * cellSize);
-                    const clampedY = clamp(centerY, actor.pos.y * cellSize, actor.pos.y * cellSize + actor.size.y * cellSize);
+                    const clampedX = clamp(centerX, pos.x * cellSize, pos.x * cellSize + size.x * cellSize);
+                    const clampedY = clamp(centerY, pos.y * cellSize, pos.y * cellSize + size.y * cellSize);
 
                     if ((clampedX - centerX)**2 + (clampedY - centerY)**2 <= (other.size.x * 0.5 * cellSize)**2 ) {
                         return other;
@@ -226,6 +224,40 @@ class Level {
             }
         }
     }
+
+    // actorAt(actor: Player) {
+    //     const cellSize = this.cellSize;
+    //
+    //     for (let i = 0; i < this.actors.length; i++) {
+    //         const other = this.actors[i];
+    //
+    //         switch (other.shape) {
+    //             case 'square':
+    //                 // square to square
+    //                 if (other !== actor &&
+    //                     actor.pos.x + actor.size.x > other.pos.x &&
+    //                     actor.pos.x < other.size.x + other.pos.x &&
+    //                     actor.pos.y + actor.size.y > other.pos.y &&
+    //                     actor.pos.y < other.size.y + other.pos.y) {
+    //                     return other;
+    //                 }
+    //                 break;
+    //             case 'circle':
+    //                 // square to circle
+    //                 const centerX = (other.pos.x + 0.5) * cellSize;
+    //                 const centerY = (other.pos.y + 0.5) * cellSize;
+    //
+    //                 const clampedX = clamp(centerX, actor.pos.x * cellSize, actor.pos.x * cellSize + actor.size.x * cellSize);
+    //                 const clampedY = clamp(centerY, actor.pos.y * cellSize, actor.pos.y * cellSize + actor.size.y * cellSize);
+    //
+    //                 if ((clampedX - centerX)**2 + (clampedY - centerY)**2 <= (other.size.x * 0.5 * cellSize)**2 ) {
+    //                     return other;
+    //                 }
+    //
+    //                 break;
+    //         }
+    //     }
+    // }
 
     updateCamera(x: number) {
         const xx = x * this.cellSize;
@@ -240,14 +272,14 @@ class Level {
 
         if (this.cameraX < this.cellSize) {
             const cellsLeft = -Math.floor(this.cameraX / this.cellSize) - 1;
-            this.currentCamera = [cellsLeft, this.canvasWidth / this.cellSize + cellsLeft + 1]
+            this.currentCamera = [Math.max(0, cellsLeft), this.canvasWidth / this.cellSize + cellsLeft + 1]
         } else {
             this.currentCamera = [0, Math.floor(this.canvasWidth / this.cellSize)]
         }
     }
 
     inCamera(x: number) {
-        return x > this.currentCamera[0] && x < this.currentCamera[1]
+        return x >= this.currentCamera[0] && x < this.currentCamera[1]
     }
 }
 

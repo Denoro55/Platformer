@@ -9,7 +9,7 @@ class Player extends Actor {
     speed: Vector;
     color: Colors;
     touched: boolean;
-    lustiness: number;
+    hp: number;
     initialSpeed: number;
     speedX: number;
     poisonTimer: number;
@@ -29,7 +29,7 @@ class Player extends Actor {
         this.speed = new Vector(0, 0);
         this.color = Colors.black;
         this.touched = false;
-        this.lustiness = 100;
+        this.hp = 100;
         this.initialSpeed = 6;
         this.speedX = this.initialSpeed;
         this.poisonTimer = 0;
@@ -62,14 +62,14 @@ class Player extends Actor {
         this.moveX(level, keys);
         this.moveY(level, keys);
 
-        const otherActor = level.actorAt(this);
+        const otherActor = level.actorAt(this.pos, this.size);
         if (otherActor) {
             this.collidesWithActors(level, [otherActor]);
         }
 
         if (this.poisonTimer > 0) {
             this.poisonTimer -= 1;
-            this.lustiness -= .04;
+            this.hp -= .04;
             this.playAnimation('poisoned');
         } else if (!this.touched) {
             this.playAnimation('stand');
@@ -78,7 +78,7 @@ class Player extends Actor {
         }
 
         this.touched = false;
-        level.playerHp = this.lustiness;
+        level.playerHp = this.hp;
     }
 
     moveX(level: Level, keys: Codes) {
@@ -102,14 +102,23 @@ class Player extends Actor {
 
         const motion = new Vector(this.speed.x * level.step, 0);
         const newPos = this.pos.plus(motion);
-        const obstacle: Obstacle = level.obstacleAt(newPos, this.size);
-        if (obstacle.type) {
-            this.collides(level, obstacle.actors);
 
+        const obstacle: Obstacle = level.obstacleAt(newPos, this.size);
+        const otherActor = level.actorAt(newPos, this.size);
+
+        if (obstacle.type) {
+            this.collidesWithObstacles(level, obstacle.actors);
             if (this.speed.x > 0) {
                 this.pos.x = obstacle.pos.x - this.size.x;
             } else if (this.speed.x < 0) {
                 this.pos.x = obstacle.pos.x + 1;
+            }
+            this.speed.x = 0;
+        } else if (otherActor !== undefined && otherActor.collisions) {
+            if (this.speed.x > 0) {
+                this.pos.x = otherActor.pos.x - this.size.x;
+            } else if (this.speed.x < 0) {
+                this.pos.x = otherActor.pos.x + otherActor.size.x;
             }
             this.speed.x = 0;
         } else {
@@ -133,20 +142,38 @@ class Player extends Actor {
         }
 
         const obstacle: Obstacle = level.obstacleAt(newPos, this.size);
-        if (obstacle.type) {
-            this.collides(level, obstacle.actors);
+        const otherActor = level.actorAt(newPos, this.size);
 
+        let collision = false;
+        let nextPosY = null;
+
+        if (obstacle.type) {
+            this.collidesWithObstacles(level, obstacle.actors);
+            if (this.speed.y > 0) {
+                nextPosY = obstacle.pos.y - this.size.y;
+            } else {
+                nextPosY =  obstacle.pos.y + 1;
+            }
+            collision = true;
+        } else if (otherActor !== undefined && otherActor.collisions) {
+            if (this.speed.y > 0) {
+                nextPosY = otherActor.pos.y - this.size.y;
+            } else {
+                nextPosY = otherActor.pos.y + otherActor.size.y;
+            }
+            collision = true;
+        }
+
+        if (collision) {
             this.jumpEnergy = 0;
 
             if (this.speed.y > 0) {
                 this.jumped = false;
-                this.pos.y = obstacle.pos.y - this.size.y;
                 this.jumpEnergy = this.initialOptions.jumpEnergy;
                 this.jumpsCount = 2;
-            } else {
-                this.pos.y = obstacle.pos.y + 1;
             }
 
+            this.pos.y = nextPosY;
             this.speed.y = 0;
 
             if (keys.up && !this.jumped && this.jumpsCount > 0) {
@@ -154,7 +181,6 @@ class Player extends Actor {
                 this.jumped = true;
                 this.speed.y = -this.jumpForce;
             }
-
         } else {
             if (keys.up) {
                 if (!this.jumped && this.jumpsCount > 0){
@@ -168,6 +194,60 @@ class Player extends Actor {
             }
             this.pos = newPos;
         }
+
+        // if (obstacle.type) {
+        //     this.collides(level, obstacle.actors);
+        //
+        //     this.jumpEnergy = 0;
+        //
+        //     if (this.speed.y > 0) {
+        //         this.jumped = false;
+        //         this.pos.y = obstacle.pos.y - this.size.y;
+        //         this.jumpEnergy = this.initialOptions.jumpEnergy;
+        //         this.jumpsCount = 2;
+        //     } else {
+        //         this.pos.y = obstacle.pos.y + 1;
+        //     }
+        //
+        //     this.speed.y = 0;
+        //
+        //     if (keys.up && !this.jumped && this.jumpsCount > 0) {
+        //         this.jumpEnergy = this.initialOptions.jumpEnergy;
+        //         this.jumped = true;
+        //         this.speed.y = -this.jumpForce;
+        //     }
+        // } else if (otherActor !== undefined) {
+        //     this.jumpEnergy = 0;
+        //
+        //     if (this.speed.y > 0) {
+        //         this.jumped = false;
+        //         this.pos.y = otherActor.pos.y - this.size.y;
+        //         this.jumpEnergy = this.initialOptions.jumpEnergy;
+        //         this.jumpsCount = 2;
+        //     } else {
+        //         this.pos.y = otherActor.pos.y + otherActor.size.y;
+        //     }
+        //
+        //     this.speed.y = 0;
+        //
+        //     if (keys.up && !this.jumped && this.jumpsCount > 0) {
+        //         this.jumpEnergy = this.initialOptions.jumpEnergy;
+        //         this.jumped = true;
+        //         this.speed.y = -this.jumpForce;
+        //     }
+        // } else {
+        //     if (keys.up) {
+        //         if (!this.jumped && this.jumpsCount > 0){
+        //             this.jumpEnergy = this.initialOptions.jumpEnergy;
+        //             this.jumped = true;
+        //         }
+        //         if (this.jumpEnergy > 0) {
+        //             this.speed.y = -this.jumpForce - 2;
+        //             this.jumpEnergy -= 1;
+        //         }
+        //     }
+        //     this.pos = newPos;
+        // }
     }
 
     collidesWithActors(level: Level, obstacles: any[]) {
@@ -186,28 +266,60 @@ class Player extends Actor {
                     break;
                 case 'enemy':
                     this.touched = true;
-                    this.lustiness -= obstacle.damage;
+                    this.hp -= obstacle.damage;
+                    break;
+                case 'spiritWall':
+                    // this.collide(obstacle);
                     break;
             }
         });
-        if (this.lustiness <= 0) {
+        if (this.hp <= 0) {
             level.status = Statuses.lost;
         }
     }
 
-    collides(level: Level, obstacles: any) {
+    collidesWithObstacles(level: Level, obstacles: any) {
         obstacles.forEach((type: string) => {
             switch (type) {
                 case 'lava':
                     this.poisonTimer = 1200;
                     this.touched = true;
-                    this.lustiness -= 1;
+                    this.hp -= 1;
                     break;
             }
         });
-        if (this.lustiness <= 0) {
+        if (this.hp <= 0) {
             level.status = Statuses.lost;
         }
+    }
+
+    collide(other: any) {
+        // if (this.pos.x < other.pos.x && this.pos.y > other.pos.y - this.size.y && this.pos.y < other.pos.y + other.size.y) {
+        //     this.pos.x = other.pos.x - this.size.x;
+        //     this.speed.x = 0;
+        // } else if (this.pos.x > other.pos.x && this.pos.y > other.pos.y - this.size.y && this.pos.y < other.pos.y + other.size.y) {
+        //     this.pos.x = other.pos.x + 1;
+        //     this.speed.x = 0;
+        // }
+        //
+        // if (this.pos.y < other.pos.y && this.pos.x > other.pos.x - this.size.x && this.pos.x < other.pos.x + other.size.x) {
+        //     this.pos.y = other.pos.y - this.size.y;
+        //     this.speed.y = 0;
+        // } else if (this.pos.y > other.pos.y && this.pos.x > other.pos.x - this.size.x && this.pos.x < other.pos.x + other.size.x) {
+        //     this.pos.y = other.pos.y + 1;
+        //     this.speed.y = 0;
+        // }
+
+        // this.jumpEnergy = 0;
+        //
+        // if (this.speed.y > 0) {
+        //     this.jumped = false;
+        //     this.pos.y = obstacle.pos.y - this.size.y;
+        //     this.jumpEnergy = this.initialOptions.jumpEnergy;
+        //     this.jumpsCount = 2;
+        // } else {
+        //     this.pos.y = obstacle.pos.y + 1;
+        // }
     }
 
     debugDraw(ctx: any, level: Level) {

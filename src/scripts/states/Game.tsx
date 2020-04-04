@@ -24,7 +24,7 @@ export default class Game {
 
     constructor(engine: Engine) {
         this.state = States.preload;
-        this.currentLevel = 1;
+        this.currentLevel = 2;
         this.currentMap = null;
         this.loadedMapIndex = null;
         const arrowCodes: Codes = {37: "left", 38: "up", 39: "right", 90: 'z'};

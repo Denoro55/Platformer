@@ -3,19 +3,16 @@ import {Types, Shapes, Colors} from "../helpers/types/index";
 import Player from "./Player";
 import DOMDisplay from "../core/Display";
 import Level from "../core/Level";
+import Actor from "./Actor";
 
-class Sphere {
-    pos: Vector;
+class Sphere extends Actor {
     basePos: Vector;
-    size: Vector;
     wobble: number;
     reloadTime: number;
     timer: number;
-    type: Types;
-    color: Colors;
-    shape: Shapes;
 
     constructor(pos: Vector) {
+        super();
         this.pos = this.basePos = pos.plus(new Vector(0, 0.35));
         this.size = new Vector(0.25, 0.25);
         this.wobble = Math.random() * Math.PI * 2;

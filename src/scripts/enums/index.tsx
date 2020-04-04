@@ -1,5 +1,5 @@
 export enum Statuses {
-    win= 'win',
+    win = 'win',
     animation = 'animation',
     coins = 'coins',
     lost = 'lost'

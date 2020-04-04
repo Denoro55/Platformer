@@ -1,11 +1,14 @@
 import Level from "./Level";
 import Game from "../states/Game";
 
-const objectsColor: any = {
-    null: 'transparent',
-    'wall': 'black',
-    'lava': '#1cec82'
-};
+import tilesFromMap from "../map/tilesFromMap";
+
+const parsedTilesFromMap: any = Object.values(tilesFromMap).reduce((acc: object, e: any) => {
+    return {...acc, [e.name]: {
+            color: e.color,
+            draw: e.draw
+        }};
+}, {});
 
 class DOMDisplay {
     level: Level;
@@ -38,25 +41,28 @@ class DOMDisplay {
         const viewParams = this.level.currentCamera;
 
         this.level.firstLayer.forEach((tile: any) => {
-            switch (tile.name) {
-                case 'lava':
-                    ctx.beginPath();
-                    ctx.fillStyle = objectsColor[tile.name];
-                    ctx.rect(tile.x * size, tile.y * size, size, size);
-                    ctx.fill();
-                    break;
-            }
+            const currentTile = parsedTilesFromMap[tile.name];
+            ctx.beginPath();
+            ctx.fillStyle = currentTile.color;
+            currentTile.draw(ctx, this, {size, x: tile.x, y: tile.y, layer: -1});
         });
 
         for (let i = 0; i < yLen; i++) {
             // for (let n = 0; n < xLen; n++) {
             for (let n = viewParams[0]; n < viewParams[1]; n++) {
                 const cellType = this.level.grid[i][n];
+                const tile = parsedTilesFromMap[cellType];
                 ctx.beginPath();
-                ctx.fillStyle = objectsColor[cellType];
-                if (cellType === 'wall') {
-                    ctx.drawImage(this.tile, n * size - 2, i * size - 2);
-                }
+                ctx.fillStyle = tile.color;
+                tile.draw(ctx, this, {size, x: n, y: i, layer: 0});
+                // switch (cellType) {
+                //     case 'wall':
+                //         ctx.drawImage(this.tile, n * size - 2, i * size - 2);
+                //         break;
+                //     case 'wall_ghost':
+                //         ctx.drawImage(this.tile, n * size - 2, i * size - 2);
+                //         break;
+                // }
                 // count ++;
                 // ctx.rect(n * size, i * size, size, size);
                 // if (cellType === 'lava') {
@@ -67,7 +73,6 @@ class DOMDisplay {
                 ctx.fill();
             }
         }
-
         // console.log(count);
     }
 

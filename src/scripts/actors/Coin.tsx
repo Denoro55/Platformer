@@ -1,17 +1,14 @@
 import Vector from "../helpers/Vector";
 import {Types, Shapes, Colors} from "../helpers/types/index";
 import Level from "../core/Level";
+import Actor from "./Actor";
 
-class Coin {
-    pos: Vector;
+class Coin extends Actor {
     basePos: Vector;
-    size: Vector;
     wobble: number;
-    type: Types;
-    color: Colors;
-    shape: Shapes;
 
     constructor(pos: Vector) {
+        super();
         this.pos = this.basePos = pos.plus(new Vector(0.25, 0.55));
         this.size = new Vector(0.5, 0.5);
         this.wobble = Math.random() * Math.PI * 2;

@@ -1,29 +1,51 @@
 import Vector from "../helpers/Vector";
 import {Types, Shapes, Colors} from "../helpers/types/index";
 import Level from "../core/Level";
+import Actor from "./Actor";
 
-class Saw {
-    pos: Vector;
-    size: Vector;
-    rotation: number;
-    type: Types;
-    color: Colors;
-    shape: Shapes;
+class Saw extends Actor {
     damage: number;
+    angle: number;
+    direction: number;
 
-    constructor(pos: Vector) {
+    axis: 'x' | 'y';
+    currentPosition: number;
+    range: number;
+
+    constructor(pos: Vector, params: any) {
+        super();
         this.pos = pos;
         this.size = new Vector(1, 1);
-        this.rotation = 0;
-
         this.color = Colors.black;
         this.shape = Shapes.circle;
         this.type = Types.enemy;
         this.damage = 1;
+        this.angle = 1;
+
+        this.direction = this.getProperty(params, 'direction', 1);
+        this.speed = new Vector(this.getProperty(params, 'speedX', 0) * this.direction, this.getProperty(params, 'speedY', 0) * this.direction);
+        this.currentPosition = this.getProperty(params, 'currentPosition', 2) / 2;
+        this.range = this.getProperty(params, 'range', 4) / 2;
+        this.axis = this.getProperty(params, 'axis', 'x');
     }
 
     act(level: Level) {
-        this.rotation += 4;
+        this.angle += 4;
+        this.currentPosition += Math.abs(this.speed[this.axis] * level.step);
+
+        let newPos: Vector;
+        if (this.axis === 'x') {
+            newPos = this.pos.plus(new Vector(this.speed.x * level.step, 0));
+        } else {
+            newPos = this.pos.plus(new Vector(0, this.speed.y * level.step));
+        }
+
+        this.pos = newPos;
+
+        if (this.currentPosition >= this.range) {
+            this.changeDirection();
+            this.currentPosition = 0;
+        }
     }
 
     draw(ctx: any, level: Level) {
@@ -46,7 +68,7 @@ class Saw {
         const xx = pos.x * level.cellSize + ((size.x * level.cellSize) / 2);
         const yy = pos.y * level.cellSize + ((size.y * level.cellSize) / 2);
 
-        [(this.rotation) * Math.PI / 180, (this.rotation + 45) * Math.PI / 180].forEach(rot => {
+        [(this.angle) * Math.PI / 180, (this.angle + 45) * Math.PI / 180].forEach(rot => {
             ctx.save();
             ctx.translate(xx, yy);
             ctx.rotate(rot);

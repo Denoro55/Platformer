@@ -2,6 +2,7 @@ export const enum Types {
     coin = 'coin',
     enemy = 'enemy',
     sphere = 'sphere',
+    spiritWall = 'spiritWall'
 }
 
 export const enum Shapes {

@@ -1,9 +1,14 @@
 import Level from "../core/Level";
 import Vector from "../helpers/Vector";
+import {Colors, Shapes, Types} from "../helpers/types/index";
+import DOMDisplay from "../core/Display";
 
 class Actor {
     pos: Vector;
     size: Vector;
+    speed: Vector;
+    alpha: number;
+    collides: boolean;
     animations: {
         [key: string]: {
             frames: number[],
@@ -17,11 +22,16 @@ class Actor {
     spriteSize: number;
     activeAnimation: string;
 
+    type: Types;
+    color: Colors;
+    shape: Shapes;
+
     constructor() {
         this.animations = {};
         this.animationInterval = null;
         this.currentFrame = 0;
         this.rotation = 1;
+        this.collides = true;
     }
 
     setSprite(src: string, spriteSize: number) {
@@ -55,7 +65,20 @@ class Actor {
         }, animation.speed);
     }
 
-    draw(ctx: any, level: Level) {
+    getProperty(props: any, propName: string, defaultValue: any) {
+        if (!props) return defaultValue;
+        const prop = props.find((prop: any) => prop.name === propName);
+        if (!prop) return defaultValue;
+        return prop.value;
+    }
+
+    changeDirection() {
+        this.speed = this.speed.times(-1);
+        this.rotation = Math.sign(this.speed.x);
+    }
+
+    draw(ctx: any, level: Level, display: DOMDisplay) {
+        ctx.globalAlpha = this.alpha;
         if (this.rotation > 0) {
             ctx.drawImage(this.image, this.currentFrame * this.spriteSize, 0, this.spriteSize - 1, this.spriteSize, this.pos.x * level.cellSize, this.pos.y * level.cellSize, this.spriteSize, this.spriteSize);
         } else {
@@ -64,6 +87,7 @@ class Actor {
             ctx.drawImage(this.image, this.currentFrame * this.spriteSize, 0, this.spriteSize - 1, this.spriteSize, -this.pos.x * level.cellSize - (this.size.x * level.cellSize), this.pos.y * level.cellSize, this.spriteSize, this.spriteSize);
             ctx.restore();
         }
+        ctx.globalAlpha = 1;
     }
 }
 
