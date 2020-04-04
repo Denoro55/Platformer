@@ -1,16 +1,35 @@
 import Vector from "../helpers/Vector";
 import Actor from "./Actor";
-import Colors from "../helpers/types/Colors";
+import {Colors} from "../helpers/types/index";
+import {Codes, Obstacle} from "../interfaces/index";
+import Level from "../core/Level";
+import {Statuses} from "../enums/index";
 
 class Player extends Actor {
-    constructor(pos) {
+    speed: Vector;
+    color: Colors;
+    touched: boolean;
+    lustiness: number;
+    initialSpeed: number;
+    speedX: number;
+    poisonTimer: number;
+    initialOptions: {
+        jumpEnergy: number
+    };
+    gravity: number;
+    jumped: boolean;
+    jumpForce: number;
+    jumpsCount: number;
+    jumpEnergy: number;
+
+    constructor(pos: Vector) {
         super();
         this.pos = pos.plus(new Vector(0.2, 0.2));
         this.size = new Vector(0.6, 0.6);
         this.speed = new Vector(0, 0);
         this.color = Colors.black;
         this.touched = false;
-        this.hp = 100;
+        this.lustiness = 100;
         this.initialSpeed = 6;
         this.speedX = this.initialSpeed;
         this.poisonTimer = 0;
@@ -33,9 +52,9 @@ class Player extends Actor {
         this.jumpEnergy = this.initialOptions.jumpEnergy;
     }
 
-    act(level, keys) {
+    act(level: Level, keys: Codes) {
         if (keys.z) {
-            this.speedX = this.initialSpeed + 2;
+            this.speedX = this.initialSpeed + 1;
         } else {
             this.speedX = this.initialSpeed;
         }
@@ -50,7 +69,7 @@ class Player extends Actor {
 
         if (this.poisonTimer > 0) {
             this.poisonTimer -= 1;
-            this.hp -= .04;
+            this.lustiness -= .04;
             this.playAnimation('poisoned');
         } else if (!this.touched) {
             this.playAnimation('stand');
@@ -59,10 +78,10 @@ class Player extends Actor {
         }
 
         this.touched = false;
-        level.playerHp = this.hp;
+        level.playerHp = this.lustiness;
     }
 
-    moveX(level, keys) {
+    moveX(level: Level, keys: Codes) {
         this.speed.x = 0;
 
         if (keys.left) {
@@ -76,16 +95,16 @@ class Player extends Actor {
 
         level.updateCamera(this.pos.x);
 
-        if (this.pos.x > level.cellsX - 1 && level.status === 'coins') {
-            level.status = 'win';
+        if (this.pos.x > level.cellsX - 1 && level.status === Statuses.coins) {
+            level.status = Statuses.animation;
+            level.timeNextLevel = 100;
         }
 
         const motion = new Vector(this.speed.x * level.step, 0);
         const newPos = this.pos.plus(motion);
-        const obstacle = level.obstacleAt(newPos, this.size);
+        const obstacle: Obstacle = level.obstacleAt(newPos, this.size);
         if (obstacle.type) {
             this.collides(level, obstacle.actors);
-            // level.playerTouched(obstacle, this);
 
             if (this.speed.x > 0) {
                 this.pos.x = obstacle.pos.x - this.size.x;
@@ -98,13 +117,13 @@ class Player extends Actor {
         }
     }
 
-    moveY(level, keys) {
+    moveY(level: Level, keys: Codes) {
         this.speed.y += level.step * this.gravity;
         const motion = new Vector(0, this.speed.y * level.step);
         const newPos = this.pos.plus(motion);
 
         if (newPos.y + this.size.y > level.cellsY - .5) {
-            level.status = 'lost';
+            level.status = Statuses.lost;
         }
 
         if (!keys.up && this.jumped) {
@@ -113,7 +132,7 @@ class Player extends Actor {
             this.jumpsCount -= 1;
         }
 
-        const obstacle = level.obstacleAt(newPos, this.size);
+        const obstacle: Obstacle = level.obstacleAt(newPos, this.size);
         if (obstacle.type) {
             this.collides(level, obstacle.actors);
 
@@ -151,7 +170,7 @@ class Player extends Actor {
         }
     }
 
-    collidesWithActors(level, obstacles) {
+    collidesWithActors(level: Level, obstacles: any[]) {
         obstacles.forEach(obstacle => {
             switch (obstacle.type) {
                 case 'coin':
@@ -159,7 +178,7 @@ class Player extends Actor {
                     if (!level.actors.some(actor => {
                         return actor.type === 'coin';
                     })) {
-                        level.status = 'coins';
+                        level.status = Statuses.coins;
                     }
                     break;
                 case 'sphere':
@@ -167,31 +186,31 @@ class Player extends Actor {
                     break;
                 case 'enemy':
                     this.touched = true;
-                    this.hp -= obstacle.damage;
+                    this.lustiness -= obstacle.damage;
                     break;
             }
         });
-        if (this.hp <= 0) {
-            level.status = 'lost';
+        if (this.lustiness <= 0) {
+            level.status = Statuses.lost;
         }
     }
 
-    collides(level, obstacles) {
-        obstacles.forEach(type => {
+    collides(level: Level, obstacles: any) {
+        obstacles.forEach((type: string) => {
             switch (type) {
                 case 'lava':
                     this.poisonTimer = 1200;
                     this.touched = true;
-                    this.hp -= 1;
+                    this.lustiness -= 1;
                     break;
             }
         });
-        if (this.hp <= 0) {
-            level.status = 'lost';
+        if (this.lustiness <= 0) {
+            level.status = Statuses.lost;
         }
     }
 
-    debugDraw(ctx, level) {
+    debugDraw(ctx: any, level: Level) {
 
     }
 }

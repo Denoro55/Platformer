@@ -1,11 +1,18 @@
 import Vector from "../helpers/Vector";
-import Shapes from "../helpers/types/Shapes";
-import Colors from "../helpers/types/Colors";
-import Types from "../helpers/types/Types";
+import {Types, Shapes, Colors} from "../helpers/types/index";
 import Actor from "./Actor";
+import Level from "../core/Level";
+import {Obstacle} from "../interfaces/index";
 
 class Lava extends Actor {
-    constructor(pos, type) {
+    pos: Vector;
+    speed: Vector;
+    damage: number;
+    type: Types;
+    shape: Shapes;
+    color: Colors;
+
+    constructor(pos: Vector, type: string) {
         super();
         this.pos = pos;
         this.size = new Vector(1, 1);
@@ -25,14 +32,14 @@ class Lava extends Actor {
         this.playAnimation('stand');
     }
 
-    act(level, keys) {
-        this.moveX(level, keys);
-        this.moveY(level, keys);
+    act(level: Level) {
+        this.moveX(level);
+        this.moveY(level);
     }
 
-    moveX(level) {
+    moveX(level: Level) {
         const newPos = this.pos.plus(this.speed.times(level.step));
-        const obstacle = level.obstacleAt(newPos, this.size);
+        const obstacle: Obstacle = level.obstacleAt(newPos, this.size);
         if (!obstacle.type) {
             this.pos = newPos;
         } else {
@@ -40,10 +47,10 @@ class Lava extends Actor {
         }
     }
 
-    moveY(level) {
+    moveY(level: Level) {
         const dir = this.speed.x > 0 ? 1 : -1;
         const newPos = this.pos.plus(new Vector(this.size.x * dir, this.size.y));
-        const obstacle = level.obstacleAt(newPos, this.size);
+        const obstacle: Obstacle = level.obstacleAt(newPos, this.size);
         if (!obstacle.type) {
             this.changeDirection();
         }
@@ -65,7 +72,7 @@ class Lava extends Actor {
     //     }
     // }
 
-    debugDraw(ctx, level) {
+    debugDraw(ctx: any, level: Level) {
         // ctx.beginPath();
         // ctx.globalAlpha = 0.3;
         // ctx.fillStyle = Colors.debug;

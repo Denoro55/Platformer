@@ -6,16 +6,19 @@ import Saw from "../actors/Saw";
 import Vector from "../helpers/Vector";
 import Star from "../effects/Star";
 import {getRandomPoint, clamp} from "../helpers/functions";
-import Colors from "../helpers/types/Colors";
+import {Colors} from "../helpers/types/index";
 import Bubble from "../effects/Bubble";
+import Engine from "../Engine";
+import {Codes} from "../interfaces/index";
+import {Statuses} from "../enums/index";
 
-const objectsFromMap = {
-    0:  null,
+const objectsFromMap: any = {
+    0: null,
     1: 'wall',
     2: 'lava'
 };
 
-const actors = {
+const actors: any = {
     2: Lava,
     3: Player,
     4: Sphere,
@@ -24,22 +27,54 @@ const actors = {
 };
 
 class Level {
-    constructor(game, currentMap) {
-        const mapTiles = currentMap.tiles;
-        this.debug = game.config.debug;
+    debug: object;
 
-        this.ctx = game.ctx;
-        this.canvasWidth = game.gameWidth;
-        this.canvasHeight = game.gameHeight;
+    ctx: any;
+
+    status: Statuses;
+
+    cellSize: number;
+    canvasWidth: number;
+    canvasHeight: number;
+    cellsX: number;
+    cellsY: number;
+    step: number;
+    playerHp: number;
+    cameraX: number;
+    timeNextLevel: number;
+    checkSize: number;
+    currentCamera: number[];
+
+    firstLayer: any[];
+    grid: any[];
+    actors: any[];
+    effects: any[];
+
+    win: boolean;
+
+    constructor(engine: Engine, currentMap: any) {
+        const mapTiles = currentMap.tiles;
+        this.debug = engine.config.debug;
+
+        this.ctx = engine.ctx;
+
+        this.canvasWidth = engine.gameWidth;
+        this.canvasHeight = engine.gameHeight;
+
         this.cellsX = mapTiles[0].length;
         this.cellsY = mapTiles.length;
+
         this.firstLayer = [];
         this.grid = [];
         this.actors = [];
         this.effects = [];
 
+        this.win = false;
+        this.timeNextLevel = -1;
+
         this.playerHp = 0;
         this.cameraX = 0;
+        this.currentCamera = [];
 
         // params
         this.cellSize = 32;
@@ -49,7 +84,7 @@ class Level {
         this.checkSize = 15;
 
         for (let i = 0; i < this.cellsY; i++) {
-            let gridLine = [];
+            let gridLine: any[] = [];
             for (let n = 0; n < this.cellsX; n++) {
                 const currentCell = mapTiles[i][n];
                 let objectType = objectsFromMap[currentCell] || null;
@@ -65,12 +100,12 @@ class Level {
                         pos: new Vector(n, i)
                     }));
                 }
-                gridLine.push(objectType)
+                gridLine.push(objectType);
             }
             this.grid.push(gridLine);
         }
 
-        currentMap.actors.forEach(actor => {
+        currentMap.actors.forEach((actor: any) => {
             const Actor = actors[actor.gid];
 
             const x = (actor.x / this.cellSize);
@@ -79,44 +114,51 @@ class Level {
             this.actors.push(new Actor(new Vector(x, y), 0));
         });
 
+        const viewParams = this.currentCamera;
+
         // stars
         for (let i = 0; i < 20; i++) {
             this.effects.push(new Star({
-                pos: getRandomPoint(this.cellsX, this.cellsY),
+                pos: getRandomPoint(viewParams[0] + this.canvasWidth / this.cellSize, this.canvasHeight / this.cellSize - 4),
                 size: new Vector(0, 0),
                 color: Colors.white,
-                strokeWidth: 1,
                 rotation: 0,
-                delay: Math.random() * 60,
-                style: 'fill'
+                delay: Math.random() * 60
             }))
         }
     }
 
-    animate(arrows) {
+    animate(keys: Codes) {
         this.actors.forEach(actor => {
-            actor.act(this, arrows);
+            actor.act(this, keys);
         });
         this.effects.forEach(effect => {
-            effect.act(this);
             effect.update(this);
-        })
+        });
+
+        // win animation
+        if (this.timeNextLevel > 0) {
+            this.timeNextLevel -= 1;
+        } else if (this.timeNextLevel === 0) {
+            this.status = Statuses.win;
+        }
     }
 
-    obstacleAt(pos, actorSize) {
+    obstacleAt(pos: Vector, actorSize: Vector) {
         const startX = Math.floor(pos.x);
         const endX = Math.ceil(pos.x + actorSize.x);
         const startY = Math.floor(pos.y);
         const endY = Math.ceil(pos.y + actorSize.y);
 
-        let result = {
+        let result: any = {
             actors: [],
             pos: {}
         };
 
-        const collider = {
+        const collider: any = {
             type: 'wall',
-            actors: ['wall']
+            actors: ['wall'],
+            pos: null
         };
 
         // выход за карту (столкновение)
@@ -151,7 +193,7 @@ class Level {
         return result;
     }
 
-    actorAt(actor) {
+    actorAt(actor: Player) {
         const cellSize = this.cellSize;
 
         for (let i = 0; i < this.actors.length; i++) {
@@ -185,7 +227,7 @@ class Level {
         }
     }
 
-    updateCamera(x) {
+    updateCamera(x: number) {
         const xx = x * this.cellSize;
         const center = this.canvasWidth / 2;
         const endX = this.cellsX * this.cellSize - center;
@@ -195,19 +237,17 @@ class Level {
         } else if (xx < endX) {
             this.cameraX = 0;
         }
-    }
 
-    getViewParams() {
         if (this.cameraX < this.cellSize) {
             const cellsLeft = -Math.floor(this.cameraX / this.cellSize) - 1;
-            return {
-                x: [cellsLeft, this.canvasWidth / this.cellSize + cellsLeft + 1]
-            }
+            this.currentCamera = [cellsLeft, this.canvasWidth / this.cellSize + cellsLeft + 1]
         } else {
-            return {
-                x: [0, Math.floor(this.canvasWidth / this.cellSize)]
-            }
+            this.currentCamera = [0, Math.floor(this.canvasWidth / this.cellSize)]
         }
+    }
+
+    inCamera(x: number) {
+        return x > this.currentCamera[0] && x < this.currentCamera[1]
     }
 }
 

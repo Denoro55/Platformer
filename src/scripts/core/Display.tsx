@@ -1,12 +1,22 @@
-const objectsColor = {
+import Level from "./Level";
+import Game from "../states/Game";
+
+const objectsColor: any = {
     null: 'transparent',
     'wall': 'black',
     'lava': '#1cec82'
 };
 
 class DOMDisplay {
-    constructor(level) {
+    level: Level;
+    alpha: number;
+    bg: any;
+    tile: any;
+    cameraX: number;
+
+    constructor(level: Level) {
         this.level = level;
+        this.alpha = 1;
         this.bg = new Image();
         this.bg.src = '/img/bg/4.jpg';
         this.tile = new Image();
@@ -14,16 +24,20 @@ class DOMDisplay {
         this.cameraX = 0;
     }
 
-    drawBackground(ctx) {
+    getMaxAlpha(alpha: number) {
+        return Math.min(alpha, this.alpha);
+    }
+
+    drawBackground(ctx: any) {
         const size = this.level.cellSize;
         const yLen = this.level.grid.length;
         const xLen = this.level.grid[0].length;
 
         let count = 0;
 
-        const viewParams = this.level.getViewParams();
+        const viewParams = this.level.currentCamera;
 
-        this.level.firstLayer.forEach(tile => {
+        this.level.firstLayer.forEach((tile: any) => {
             switch (tile.name) {
                 case 'lava':
                     ctx.beginPath();
@@ -36,7 +50,7 @@ class DOMDisplay {
 
         for (let i = 0; i < yLen; i++) {
             // for (let n = 0; n < xLen; n++) {
-            for (let n = viewParams.x[0]; n < viewParams.x[1]; n++) {
+            for (let n = viewParams[0]; n < viewParams[1]; n++) {
                 const cellType = this.level.grid[i][n];
                 ctx.beginPath();
                 ctx.fillStyle = objectsColor[cellType];
@@ -57,17 +71,18 @@ class DOMDisplay {
         // console.log(count);
     }
 
-    drawActors(ctx) {
+    drawActors(ctx: any) {
         this.level.actors.forEach(actor => {
-            actor.draw(ctx, this.level);
             if (this.level.debug) {
                 actor.debugDraw(ctx, this.level);
+            } else if (this.level.inCamera(actor.pos.x)) {
+                actor.draw(ctx, this.level, this);
             }
             actor.touched = false;
         })
     }
 
-    drawCheck(ctx) {
+    drawCheck(ctx: any) {
         const checkSize = this.level.checkSize;
 
         if (this.level.status !== 'win') {
@@ -92,7 +107,7 @@ class DOMDisplay {
         }
     }
 
-    drawHealthBar(ctx) {
+    drawHealthBar(ctx: any) {
         const maxHp = 100;
 
         const x = 50,
@@ -110,49 +125,17 @@ class DOMDisplay {
         ctx.stroke();
     }
 
-    drawEffects(ctx) {
+    drawEffects(ctx: any) {
         this.level.effects.forEach(effect => {
-            ctx.beginPath();
-            if (effect.options && effect.options.style === 'stroke') {
-                ctx.lineWidth = effect.options.strokeWidth || 2;
-                ctx.strokeStyle = effect.color;
-            } else {
-                ctx.fillStyle = effect.color;
-            }
-            switch (effect.type) {
-                case 'star':
-                    if (effect.options.style === 'stroke') {
-                        ctx.rect(effect.pos.x * this.level.cellSize, effect.pos.y * this.level.cellSize, effect.size.x * this.level.cellSize, effect.size.y * this.level.cellSize);
-                        ctx.stroke();
-                    } else {
-                        ctx.save();
-                        ctx.globalAlpha = effect.alpha;
-                        const offsetX = effect.pos.x * this.level.cellSize + ((effect.size.x * this.level.cellSize) / 2);
-                        const offsetY = effect.pos.y* this.level.cellSize + ((effect.size.y * this.level.cellSize) / 2);
-                        ctx.translate(offsetX, offsetY);
-                        ctx.rotate(effect.rotation * Math.PI / 180); // rotate around the start point of your line
-                        ctx.translate(-offsetX, -offsetY);
-                        ctx.fillRect(effect.pos.x * this.level.cellSize, effect.pos.y * this.level.cellSize, effect.size.x * this.level.cellSize, effect.size.y * this.level.cellSize);
-                        ctx.restore();
-                    }
-                    break;
-                case 'bubble':
-                    ctx.globalAlpha = effect.alpha;
-                    ctx.beginPath();
-                    ctx.fillStyle = effect.color;
-                    ctx.arc((effect.pos.x + .5 + effect.offsetX) * this.level.cellSize, (effect.pos.y) * this.level.cellSize, effect.timer / 30, 0, 2 * Math.PI);
-                    ctx.fill();
-                    break;
-            }
-            ctx.globalAlpha = 1;
+            effect.draw(ctx, this.level, this);
         })
     };
 
-    drawText(ctx) {
+    drawText(ctx: any, currentLevel: number) {
         ctx.font = "14px Arial";
         ctx.fillStyle = "white";
         ctx.textAlign = "center";
-        ctx.fillText("Уровень 1", 450 - this.level.cameraX, 40);
+        ctx.fillText("Уровень " + currentLevel, 450 - this.level.cameraX, 40);
 
         ctx.textAlign = "left";
         ctx.font = "12px Arial";
@@ -163,8 +146,16 @@ class DOMDisplay {
         });
     }
 
-    drawFrame(game) {
+    drawFrame(game: Game) {
         const ctx = this.level.ctx;
+
+        if (this.level.timeNextLevel >= 0) {
+            this.alpha = this.level.timeNextLevel / 100;
+        } else {
+            this.alpha = 1;
+        }
+
+        ctx.globalAlpha = this.alpha;
         ctx.save();
         ctx.translate(this.level.cameraX, 0);
 
@@ -174,7 +165,7 @@ class DOMDisplay {
         this.drawBackground(ctx);
         this.drawCheck(ctx);
         this.drawHealthBar(ctx);
-        this.drawText(ctx);
+        this.drawText(ctx, game.currentLevel);
 
         ctx.restore();
     }

@@ -1,19 +1,36 @@
+import Level from "../core/Level";
+import Vector from "../helpers/Vector";
+
 class Actor {
+    pos: Vector;
+    size: Vector;
+    animations: {
+        [key: string]: {
+            frames: number[],
+            speed: number
+        }
+    };
+    animationInterval: any;
+    currentFrame: number;
+    rotation: number;
+    image: any;
+    spriteSize: number;
+    activeAnimation: string;
+
     constructor() {
-        this.animations = [];
+        this.animations = {};
         this.animationInterval = null;
         this.currentFrame = 0;
-
         this.rotation = 1;
     }
 
-    setSprite(src, spriteSize) {
+    setSprite(src: string, spriteSize: number) {
         this.image = new Image();
         this.image.src = `/img/actors/${src}`;
         this.spriteSize = spriteSize;
     }
 
-    setAnimation(name, frames, speed) {
+    setAnimation(name: string, frames: number[], speed: number) {
         this.animations[name] = {
             frames, speed
         }
@@ -23,7 +40,7 @@ class Actor {
         return this.activeAnimation;
     }
 
-    playAnimation(name) {
+    playAnimation(name: string) {
         if (this.getCurrentAnimation() === name) return;
 
         clearTimeout(this.animationInterval);
@@ -38,7 +55,7 @@ class Actor {
         }, animation.speed);
     }
 
-    draw(ctx, level) {
+    draw(ctx: any, level: Level) {
         if (this.rotation > 0) {
             ctx.drawImage(this.image, this.currentFrame * this.spriteSize, 0, this.spriteSize - 1, this.spriteSize, this.pos.x * level.cellSize, this.pos.y * level.cellSize, this.spriteSize, this.spriteSize);
         } else {

@@ -1,10 +1,17 @@
 import Vector from "../helpers/Vector";
-import Shapes from "../helpers/types/Shapes";
-import Colors from "../helpers/types/Colors";
-import Types from "../helpers/types/Types";
+import {Types, Shapes, Colors} from "../helpers/types/index";
+import Level from "../core/Level";
 
 class Saw {
-    constructor(pos) {
+    pos: Vector;
+    size: Vector;
+    rotation: number;
+    type: Types;
+    color: Colors;
+    shape: Shapes;
+    damage: number;
+
+    constructor(pos: Vector) {
         this.pos = pos;
         this.size = new Vector(1, 1);
         this.rotation = 0;
@@ -15,11 +22,11 @@ class Saw {
         this.damage = 1;
     }
 
-    act(level) {
+    act(level: Level) {
         this.rotation += 4;
     }
 
-    draw(ctx, level) {
+    draw(ctx: any, level: Level) {
         ctx.beginPath();
         ctx.fillStyle = this.color;
 
@@ -50,7 +57,7 @@ class Saw {
         });
     }
 
-    debugDraw(ctx, level) {
+    debugDraw(ctx: any, level: Level) {
         ctx.beginPath();
         ctx.globalAlpha = 0.3;
         ctx.fillStyle = Colors.debug;
