@@ -5,8 +5,8 @@ import {getRandomPoint, clamp} from "../helpers/functions";
 import {Colors} from "../helpers/types/index";
 import Bubble from "../effects/Bubble";
 import Engine from "../Engine";
-import {Codes} from "../interfaces/index";
-import {Statuses} from "../enums/index";
+import {Codes} from "../helpers/interfaces/index";
+import {Statuses} from "../helpers/enums/index";
 
 import tilesFromMap from "../map/tilesFromMap";
 import actorsFromMap from "../map/actorsFromMap";
@@ -96,8 +96,6 @@ class Level {
             }
             this.grid.push(gridLine);
         }
-
-        console.log(this.grid);
 
         currentMap.actors.forEach((actor: any) => {
             const Actor = actorsFromMap[actor.gid];

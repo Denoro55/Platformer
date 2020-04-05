@@ -7,8 +7,10 @@ class SpiritWall extends Actor {
     shape: Shapes;
     type: Types;
     collisions: boolean;
-    timer: number;
     startTime: number;
+
+    // params
+    timer: number; // (1, 2) = 150, 300
 
     constructor(pos: Vector, params: any) {
         super();

@@ -34,9 +34,9 @@ class DOMDisplay {
     drawBackground(ctx: any) {
         const size = this.level.cellSize;
         const yLen = this.level.grid.length;
-        const xLen = this.level.grid[0].length;
+        // const xLen = this.level.grid[0].length;
 
-        let count = 0;
+        // let count = 0;
 
         const viewParams = this.level.currentCamera;
 

@@ -78,7 +78,7 @@ class Actor {
     }
 
     draw(ctx: any, level: Level, display: DOMDisplay) {
-        ctx.globalAlpha = this.alpha;
+        ctx.globalAlpha = display.getMaxAlpha(this.alpha);
         if (this.rotation > 0) {
             ctx.drawImage(this.image, this.currentFrame * this.spriteSize, 0, this.spriteSize - 1, this.spriteSize, this.pos.x * level.cellSize, this.pos.y * level.cellSize, this.spriteSize, this.spriteSize);
         } else {
@@ -87,7 +87,7 @@ class Actor {
             ctx.drawImage(this.image, this.currentFrame * this.spriteSize, 0, this.spriteSize - 1, this.spriteSize, -this.pos.x * level.cellSize - (this.size.x * level.cellSize), this.pos.y * level.cellSize, this.spriteSize, this.spriteSize);
             ctx.restore();
         }
-        ctx.globalAlpha = 1;
+        ctx.globalAlpha = display.getMaxAlpha(1);
     }
 }
 

@@ -1,12 +1,8 @@
 import Level from "../core/Level";
 import Display from "../core/Display"
 import Engine from "../Engine";
-import {Codes} from "../interfaces/index";
-
-enum States {
-    preload = 'preload',
-    game = 'game'
-}
+import {Codes} from "../helpers/interfaces/index";
+import {GameStates} from "../helpers/enums/index";
 
 interface ParsedMap {
     tiles: any[],
@@ -21,10 +17,11 @@ export default class Game {
     keys: Codes;
     level: Level;
     display: Display;
+    gameTime: boolean;
 
     constructor(engine: Engine) {
-        this.state = States.preload;
-        this.currentLevel = 2;
+        this.state = GameStates.preload;
+        this.currentLevel = engine.config.level;
         this.currentMap = null;
         this.loadedMapIndex = null;
         const arrowCodes: Codes = {37: "left", 38: "up", 39: "right", 90: 'z'};
@@ -32,7 +29,8 @@ export default class Game {
     }
 
     async create(engine: Engine) {
-        this.state = States.preload;
+        this.gameTime = false;
+        this.state = GameStates.preload;
         let map: any;
         if (this.loadedMapIndex !== this.currentLevel) {
             try {
@@ -47,7 +45,11 @@ export default class Game {
         }
         this.level = new Level(engine, map);
         this.display = new Display(this.level);
-        this.state = States.game;
+        this.state = GameStates.game;
+
+        setTimeout(() => {
+            this.gameTime = true;
+        }, 2000);
     }
 
     trackKeys(codes: Codes) {
@@ -79,9 +81,9 @@ export default class Game {
     }
 
     render(engine: Engine) {
-        if (this.state === States.game) {
+        if (this.state === GameStates.game) {
             this.display.drawFrame(this);
-        } else if (this.state === States.preload) {
+        } else if (this.state === GameStates.preload) {
             const ctx = engine.ctx;
             ctx.globalAlpha = 1;
             ctx.font = "18px Arial";

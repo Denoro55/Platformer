@@ -6,11 +6,12 @@ import Actor from "./Actor";
 class Saw extends Actor {
     damage: number;
     angle: number;
-    direction: number;
 
+    // params
     axis: 'x' | 'y';
-    currentPosition: number;
-    range: number;
+    direction: number; // 1, -1
+    currentPosition: number; // 1 cell = 2
+    range: number; // 1 cell = 2
 
     constructor(pos: Vector, params: any) {
         super();

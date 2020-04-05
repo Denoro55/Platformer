@@ -1,9 +1,9 @@
 import Vector from "../helpers/Vector";
 import Actor from "./Actor";
 import {Colors} from "../helpers/types/index";
-import {Codes, Obstacle} from "../interfaces/index";
+import {Codes, Obstacle} from "../helpers/interfaces/index";
 import Level from "../core/Level";
-import {Statuses} from "../enums/index";
+import {Statuses} from "../helpers/enums/index";
 
 class Player extends Actor {
     speed: Vector;

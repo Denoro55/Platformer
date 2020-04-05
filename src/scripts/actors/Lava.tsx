@@ -2,7 +2,7 @@ import Vector from "../helpers/Vector";
 import {Types, Shapes, Colors} from "../helpers/types/index";
 import Actor from "./Actor";
 import Level from "../core/Level";
-import {Obstacle} from "../interfaces/index";
+import {Obstacle} from "../helpers/interfaces/index";
 
 class Lava extends Actor {
     damage: number;

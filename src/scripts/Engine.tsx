@@ -1,3 +1,9 @@
+import {GameStates} from "./helpers/enums/index";
+import Game from "./states/Game";
+
+let times = 0;
+let timeSum = 0;
+
 export default class Engine {
     private states: {
         [key: string]: any,
@@ -44,10 +50,21 @@ export default class Engine {
             var time = performance.now();
             this.states[this.activeState].update(this);
             this.states[this.activeState].render(this);
+
             time = performance.now() - time;
+            if (this._config.gameTime) {
+                const game = this.getCurrentState();
+                if (game instanceof Game && game.state === GameStates.game && game.gameTime) {
+                    times++;
+                    timeSum += time;
+                    console.log('Время выполнения = ', timeSum / times);
+                }
+            }
+
             if (this._config.scriptTime) {
                 console.log('Время выполнения = ', time);
             }
+
             window.requestAnimationFrame(frame);
         };
         frame();

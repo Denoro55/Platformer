@@ -1,5 +1,7 @@
 export default {
     development: false,
     debug: false,
-    scriptTime: true
+    scriptTime: false,
+    gameTime: false,
+    level: 1
 };

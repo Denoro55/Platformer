@@ -4,3 +4,8 @@ export enum Statuses {
     coins = 'coins',
     lost = 'lost'
 }
+
+export enum GameStates {
+    preload = 'preload',
+    game = 'game'
+}
