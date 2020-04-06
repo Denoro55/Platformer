@@ -194,60 +194,6 @@ class Player extends Actor {
             }
             this.pos = newPos;
         }
-
-        // if (obstacle.type) {
-        //     this.collides(level, obstacle.actors);
-        //
-        //     this.jumpEnergy = 0;
-        //
-        //     if (this.speed.y > 0) {
-        //         this.jumped = false;
-        //         this.pos.y = obstacle.pos.y - this.size.y;
-        //         this.jumpEnergy = this.initialOptions.jumpEnergy;
-        //         this.jumpsCount = 2;
-        //     } else {
-        //         this.pos.y = obstacle.pos.y + 1;
-        //     }
-        //
-        //     this.speed.y = 0;
-        //
-        //     if (keys.up && !this.jumped && this.jumpsCount > 0) {
-        //         this.jumpEnergy = this.initialOptions.jumpEnergy;
-        //         this.jumped = true;
-        //         this.speed.y = -this.jumpForce;
-        //     }
-        // } else if (otherActor !== undefined) {
-        //     this.jumpEnergy = 0;
-        //
-        //     if (this.speed.y > 0) {
-        //         this.jumped = false;
-        //         this.pos.y = otherActor.pos.y - this.size.y;
-        //         this.jumpEnergy = this.initialOptions.jumpEnergy;
-        //         this.jumpsCount = 2;
-        //     } else {
-        //         this.pos.y = otherActor.pos.y + otherActor.size.y;
-        //     }
-        //
-        //     this.speed.y = 0;
-        //
-        //     if (keys.up && !this.jumped && this.jumpsCount > 0) {
-        //         this.jumpEnergy = this.initialOptions.jumpEnergy;
-        //         this.jumped = true;
-        //         this.speed.y = -this.jumpForce;
-        //     }
-        // } else {
-        //     if (keys.up) {
-        //         if (!this.jumped && this.jumpsCount > 0){
-        //             this.jumpEnergy = this.initialOptions.jumpEnergy;
-        //             this.jumped = true;
-        //         }
-        //         if (this.jumpEnergy > 0) {
-        //             this.speed.y = -this.jumpForce - 2;
-        //             this.jumpEnergy -= 1;
-        //         }
-        //     }
-        //     this.pos = newPos;
-        // }
     }
 
     collidesWithActors(level: Level, obstacles: any[]) {
@@ -267,9 +213,6 @@ class Player extends Actor {
                 case 'enemy':
                     this.touched = true;
                     this.hp -= obstacle.damage;
-                    break;
-                case 'spiritWall':
-                    // this.collide(obstacle);
                     break;
             }
         });
@@ -291,35 +234,6 @@ class Player extends Actor {
         if (this.hp <= 0) {
             level.status = Statuses.lost;
         }
-    }
-
-    collide(other: any) {
-        // if (this.pos.x < other.pos.x && this.pos.y > other.pos.y - this.size.y && this.pos.y < other.pos.y + other.size.y) {
-        //     this.pos.x = other.pos.x - this.size.x;
-        //     this.speed.x = 0;
-        // } else if (this.pos.x > other.pos.x && this.pos.y > other.pos.y - this.size.y && this.pos.y < other.pos.y + other.size.y) {
-        //     this.pos.x = other.pos.x + 1;
-        //     this.speed.x = 0;
-        // }
-        //
-        // if (this.pos.y < other.pos.y && this.pos.x > other.pos.x - this.size.x && this.pos.x < other.pos.x + other.size.x) {
-        //     this.pos.y = other.pos.y - this.size.y;
-        //     this.speed.y = 0;
-        // } else if (this.pos.y > other.pos.y && this.pos.x > other.pos.x - this.size.x && this.pos.x < other.pos.x + other.size.x) {
-        //     this.pos.y = other.pos.y + 1;
-        //     this.speed.y = 0;
-        // }
-
-        // this.jumpEnergy = 0;
-        //
-        // if (this.speed.y > 0) {
-        //     this.jumped = false;
-        //     this.pos.y = obstacle.pos.y - this.size.y;
-        //     this.jumpEnergy = this.initialOptions.jumpEnergy;
-        //     this.jumpsCount = 2;
-        // } else {
-        //     this.pos.y = obstacle.pos.y + 1;
-        // }
     }
 
     debugDraw(ctx: any, level: Level) {

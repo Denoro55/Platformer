@@ -3,13 +3,32 @@ import Display from "../core/Display"
 import Engine from "../Engine";
 import {Codes} from "../helpers/interfaces/index";
 import {GameStates} from "../helpers/enums/index";
+import State from "./State";
 
 interface ParsedMap {
     tiles: any[],
     actors: any[],
 }
 
-export default class Game {
+const arrowCodes: Codes = {37: "left", 38: "up", 39: "right", 90: 'z'};
+
+const trackKeys = (codes: Codes) => {
+    const pressed: {
+        [key: string]: any
+    } = {};
+    const handler = (e: any) => {
+        if (codes.hasOwnProperty(e.keyCode)) {
+            const code = codes[e.keyCode];
+            pressed[code] = e.type === 'keydown';
+            e.preventDefault();
+        }
+    };
+    addEventListener('keydown', handler);
+    addEventListener('keyup', handler);
+    return pressed;
+};
+
+export default class Game extends State {
     state: string;
     currentLevel: number;
     currentMap: any;
@@ -20,12 +39,12 @@ export default class Game {
     gameTime: boolean;
 
     constructor(engine: Engine) {
+        super();
         this.state = GameStates.preload;
         this.currentLevel = engine.config.level;
         this.currentMap = null;
         this.loadedMapIndex = null;
-        const arrowCodes: Codes = {37: "left", 38: "up", 39: "right", 90: 'z'};
-        this.keys = this.trackKeys(arrowCodes);
+        this.keys = trackKeys(arrowCodes);
     }
 
     async create(engine: Engine) {
@@ -52,44 +71,34 @@ export default class Game {
         }, 2000);
     }
 
-    trackKeys(codes: Codes) {
-        const pressed: {
-            [key: string]: any
-        } = {};
-        const handler = (e: any) => {
-            if (codes.hasOwnProperty(e.keyCode)) {
-                const code = codes[e.keyCode];
-                pressed[codes[e.keyCode]] = e.type === 'keydown';
-                e.preventDefault();
-            }
-        };
-        addEventListener('keydown', handler);
-        addEventListener('keyup', handler);
-        return pressed;
-    }
-
     update(engine: Engine) {
         if (this.state === 'game') {
             this.level.animate(this.keys);
-            if (this.level.status === 'lost') {
-                this.create(engine);
-            } else if (this.level.status === 'win') {
-                this.currentLevel += 1;
-                this.create(engine);
+            switch (this.level.status) {
+                case 'lost':
+                    this.create(engine);
+                    break;
+                case 'win':
+                    this.currentLevel += 1;
+                    this.create(engine);
+                    break;
             }
         }
     }
 
     render(engine: Engine) {
-        if (this.state === GameStates.game) {
-            this.display.drawFrame(this);
-        } else if (this.state === GameStates.preload) {
-            const ctx = engine.ctx;
-            ctx.globalAlpha = 1;
-            ctx.font = "18px Arial";
-            ctx.fillStyle = "white";
-            ctx.textAlign = "center";
-            ctx.fillText("Загрузка уровня...", engine.gameWidth / 2, engine.gameHeight / 2);
+        switch (this.state) {
+            case GameStates.game:
+                this.display.drawFrame(this);
+                break;
+            case GameStates.preload:
+                const ctx = engine.ctx;
+                ctx.globalAlpha = 1;
+                ctx.font = "18px Arial";
+                ctx.fillStyle = "white";
+                ctx.textAlign = "center";
+                ctx.fillText("Загрузка уровня...", engine.gameWidth / 2, engine.gameHeight / 2);
+                break;
         }
     }
 
@@ -111,7 +120,7 @@ export default class Game {
                     const height = tilesLayer.height;
 
                     for (let h = 0; h < height; h++) {
-                        let gridLine = [];
+                        let gridLine: any = [];
                         for (let w = 0; w < width; w++) {
                             gridLine.push(data[(h * width) + w]);
                         }

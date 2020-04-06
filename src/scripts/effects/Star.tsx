@@ -13,7 +13,6 @@ export default class extends Effect {
     delay: number;
     type: string;
     alpha: number;
-    image: any;
 
     constructor(params: any) {
         super(params);

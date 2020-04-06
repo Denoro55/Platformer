@@ -10,4 +10,11 @@ function clamp (x: number, min: number, max: number) {
     return x;
 }
 
-export { getRandomPoint, clamp };
+function getActorProperty(props: any, propName: string, defaultValue: any) {
+    if (!props) return defaultValue;
+    const prop = props.find((prop: any) => prop.name === propName);
+    if (!prop) return defaultValue;
+    return prop.value;
+}
+
+export { getRandomPoint, clamp, getActorProperty };

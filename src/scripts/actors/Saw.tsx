@@ -2,6 +2,7 @@ import Vector from "../helpers/Vector";
 import {Types, Shapes, Colors} from "../helpers/types/index";
 import Level from "../core/Level";
 import Actor from "./Actor";
+import {getActorProperty} from "../helpers/functions";
 
 class Saw extends Actor {
     damage: number;
@@ -23,11 +24,11 @@ class Saw extends Actor {
         this.damage = 1;
         this.angle = 1;
 
-        this.direction = this.getProperty(params, 'direction', 1);
-        this.speed = new Vector(this.getProperty(params, 'speedX', 0) * this.direction, this.getProperty(params, 'speedY', 0) * this.direction);
-        this.currentPosition = this.getProperty(params, 'currentPosition', 2) / 2;
-        this.range = this.getProperty(params, 'range', 4) / 2;
-        this.axis = this.getProperty(params, 'axis', 'x');
+        this.direction = getActorProperty(params, 'direction', 1);
+        this.speed = new Vector(getActorProperty(params, 'speedX', 0) * this.direction, getActorProperty(params, 'speedY', 0) * this.direction);
+        this.currentPosition = getActorProperty(params, 'currentPosition', 2) / 2;
+        this.range = getActorProperty(params, 'range', 4) / 2;
+        this.axis = getActorProperty(params, 'axis', 'x');
     }
 
     act(level: Level) {

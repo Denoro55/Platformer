@@ -1,15 +1,17 @@
-import {GameStates} from "./helpers/enums/index";
-import Game from "./states/Game";
+import Debugger from "./Debugger";
 
-let times = 0;
-let timeSum = 0;
+class FakeDebugger {
+    start() {}
+    end() {}
+}
 
 export default class Engine {
+    private debug: Debugger;
     private states: {
         [key: string]: any,
     };
     private activeState: string;
-    private canvas: any;
+    readonly canvas: any;
     readonly ctx: any;
     readonly gameWidth: number;
     readonly gameHeight: number;
@@ -17,7 +19,8 @@ export default class Engine {
         [key: string]: any,
     };
 
-    constructor(canvas: any, config: object) {
+    constructor(canvas: any, config: object, Debugger?: any) {
+        this.debug = Debugger !== undefined ? new Debugger(this) : new FakeDebugger;
         this.states = {};
         this.activeState = null;
         this.canvas = canvas;
@@ -25,9 +28,6 @@ export default class Engine {
         this.gameWidth = this.canvas.width;
         this.gameHeight = this.canvas.height;
         this._config = config;
-
-        const fakeImage: any = new Image();
-        fakeImage.src = '/img/bg/4.jpg';
     }
 
     addState(name: string, handler: any, params: object = {}) {
@@ -44,26 +44,18 @@ export default class Engine {
         this.states[this.activeState].create(this, params);
     }
 
+    runFrame() {
+        this.states[this.activeState].update(this);
+        this.states[this.activeState].render(this);
+    }
+
     run() {
         const frame = () => {
             this.ctx.clearRect(0, 0, this.gameWidth, this.gameHeight);
-            var time = performance.now();
-            this.states[this.activeState].update(this);
-            this.states[this.activeState].render(this);
 
-            time = performance.now() - time;
-            if (this._config.gameTime) {
-                const game = this.getCurrentState();
-                if (game instanceof Game && game.state === GameStates.game && game.gameTime) {
-                    times++;
-                    timeSum += time;
-                    console.log('Время выполнения = ', timeSum / times);
-                }
-            }
-
-            if (this._config.scriptTime) {
-                console.log('Время выполнения = ', time);
-            }
+            this.debug.start();
+            this.runFrame();
+            this.debug.end();
 
             window.requestAnimationFrame(frame);
         };
@@ -77,42 +69,4 @@ export default class Engine {
     getCurrentState() {
         return this.states[this.activeState];
     }
-
-    // parseMaps(maps) {
-    //     let parsedMaps = [];
-    //
-    //     maps.forEach(map => {
-    //         const parsedMap = {
-    //             tiles: [],
-    //             actors: []
-    //         };
-    //
-    //         // tiles
-    //         const tilesLayer = map.layers.find(layer => layer.name === 'tiles');
-    //
-    //         const data = tilesLayer.data;
-    //         const width = tilesLayer.width;
-    //         const height = tilesLayer.height;
-    //
-    //         for (let h = 0; h < height; h++) {
-    //             let gridLine = [];
-    //             for (let w = 0; w < width; w++) {
-    //                 gridLine.push(data[(h * width) + w]);
-    //             }
-    //             parsedMap.tiles.push(gridLine);
-    //         }
-    //
-    //         //actors
-    //         const actorsLayer = map.layers.find(layer => layer.name === 'actors');
-    //
-    //         actorsLayer.objects.forEach(actor => {
-    //             parsedMap.actors.push(actor)
-    //         });
-    //
-    //         // console.log(parsedMap);
-    //         parsedMaps.push(parsedMap);
-    //     });
-    //
-    //     return parsedMaps;
-    // }
 }

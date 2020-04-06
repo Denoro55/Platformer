@@ -2,6 +2,7 @@ import Actor from "./Actor";
 import Level from "../core/Level";
 import Vector from "../helpers/Vector";
 import {Shapes, Types} from "../helpers/types/index";
+import {getActorProperty} from "../helpers/functions";
 
 class SpiritWall extends Actor {
     shape: Shapes;
@@ -22,7 +23,7 @@ class SpiritWall extends Actor {
         this.collisions = true;
         this.alpha = .2;
         this.startTime = 300;
-        this.timer = this.getProperty(params,'startTimer', 2) * 150;
+        this.timer =getActorProperty(params,'startTimer', 2) * 150;
     }
 
     act(level: Level) {

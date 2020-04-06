@@ -3,10 +3,10 @@ import Game from "../states/Game";
 
 import tilesFromMap from "../map/tilesFromMap";
 
-const parsedTilesFromMap: any = Object.values(tilesFromMap).reduce((acc: object, e: any) => {
-    return {...acc, [e.name]: {
-            color: e.color,
-            draw: e.draw
+const parsedTilesFromMap: any = Object.values(tilesFromMap).reduce((acc: object, {name, color, draw}) => {
+    return {...acc, [name]: {
+            color,
+            draw
         }};
 }, {});
 

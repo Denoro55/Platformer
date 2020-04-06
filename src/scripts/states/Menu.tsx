@@ -1,9 +1,11 @@
 import Engine from "../Engine";
+import State from "./State";
 
-export default class Menu {
+export default class Menu extends State {
     constructor(engine: Engine, params: object) {
+        super();
         addEventListener('keyup', (e) => {
-            if (e.keyCode === 83 && engine.getCurrentState() === this) {
+            if (e.keyCode === 83 && engine.getCurrentState().stateName === 'menu') {
                 engine.changeState('game');
             }
         });

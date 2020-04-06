@@ -65,13 +65,6 @@ class Actor {
         }, animation.speed);
     }
 
-    getProperty(props: any, propName: string, defaultValue: any) {
-        if (!props) return defaultValue;
-        const prop = props.find((prop: any) => prop.name === propName);
-        if (!prop) return defaultValue;
-        return prop.value;
-    }
-
     changeDirection() {
         this.speed = this.speed.times(-1);
         this.rotation = Math.sign(this.speed.x);
