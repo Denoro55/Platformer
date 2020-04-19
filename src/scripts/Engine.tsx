@@ -19,8 +19,8 @@ export default class Engine {
         [key: string]: any,
     };
 
-    constructor(canvas: any, config: object, Debugger?: any) {
-        this.debug = Debugger !== undefined ? new Debugger(this) : new FakeDebugger;
+    constructor(canvas: any, config: object, debug?: any) {
+        this.debug = debug !== undefined ? new debug(this) : new FakeDebugger;
         this.states = {};
         this.activeState = null;
         this.canvas = canvas;
