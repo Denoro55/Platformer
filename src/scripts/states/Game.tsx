@@ -111,7 +111,7 @@ export default class Game extends State {
         };
 
         return new Promise((resolve, reject) => {
-            fetch(`/maps/level${level}.json`)
+            fetch(`./maps/level${level}.json`)
                 .then(response => response.json())
                 .then(map => {
                     // tiles

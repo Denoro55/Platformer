@@ -10,7 +10,7 @@ import Game from "./states/Game"
 
 // preload
 const fakeImage: any = new Image();
-fakeImage.src = '/img/bg/4.jpg';
+fakeImage.src = './img/bg/4.jpg';
 
 const canvas = document.querySelector('canvas');
 

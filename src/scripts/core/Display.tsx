@@ -21,9 +21,9 @@ class DOMDisplay {
         this.level = level;
         this.alpha = 1;
         this.bg = new Image();
-        this.bg.src = '/img/bg/4.jpg';
+        this.bg.src = './img/bg/4.jpg';
         this.tile = new Image();
-        this.tile.src = '/img/tile.png';
+        this.tile.src = './img/tile.png';
         this.cameraX = 0;
     }
 
