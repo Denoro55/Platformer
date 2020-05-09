@@ -2,10 +2,12 @@ import Engine from "../Engine";
 import State from "./State";
 
 export default class Menu extends State {
+    stateName = 'menu';
+
     constructor(engine: Engine, params: object) {
         super();
         addEventListener('keyup', (e) => {
-            if (e.keyCode === 83 && engine.getCurrentState().stateName === 'menu') {
+            if (e.keyCode === 83 && engine.getCurrentState().stateName === this.stateName) {
                 engine.changeState('game');
             }
         });

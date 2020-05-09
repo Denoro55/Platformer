@@ -29,6 +29,8 @@ const trackKeys = (codes: Codes) => {
 };
 
 export default class Game extends State {
+    stateName = 'game';
+
     state: string;
     currentLevel: number;
     currentMap: any;
