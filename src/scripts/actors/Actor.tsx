@@ -36,7 +36,7 @@ class Actor {
 
     setSprite(src: string, spriteSize: number) {
         this.image = new Image();
-        this.image.src = `/img/actors/${src}`;
+        this.image.src = `./img/actors/${src}`;
         this.spriteSize = spriteSize;
     }
 
